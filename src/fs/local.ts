@@ -68,7 +68,10 @@ class LocalProcessor extends AsyncProcessor<LocalTreeNode, TreeNode> {
 			return new Promise(resolve => w.on("end", resolve));
 		}
 		if (node.type == "folder") {
-			return fs.mkdir(target, { recursive: true }).then(() => { });
+			await fs.mkdir(target, { recursive: true });
+			const created: LocalTreeNode = Object.assign({ path: target }, node);
+			await Promise.all(node.entries.map(ent => this.create(created, ent)));
+			return;
 		}
 	}
 	async delete(node: LocalTreeNode): Promise<void> {
