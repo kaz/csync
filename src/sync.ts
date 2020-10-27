@@ -14,11 +14,11 @@ const opt = {
 	},
 };
 
-export default class <F extends TreeNode, A extends TreeNode> {
-	private src: Tree<A>;
-	private dst: Tree<F>;
+export default class {
+	private src: Tree<TreeNode>;
+	private dst: Tree<TreeNode>;
 
-	constructor(src: Tree<A>, dst: Tree<F>) {
+	constructor(src: Tree<TreeNode>, dst: Tree<TreeNode>) {
 		this.src = src;
 		this.dst = dst;
 	}

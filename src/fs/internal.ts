@@ -26,19 +26,26 @@ export abstract class AsyncProcessor<F, A> implements Processor<F, A> {
 	private createQueue: (() => Promise<void>)[] = [];
 	private deleteQueue: (() => Promise<void>)[] = [];
 
-	processNew = (q: NewOp<F, A>): void => {
+	constructor() {
+		// diff-tree::patch() calls methods defined in Processor without `this` context.
+		// This behavior causes an error (accessing fields of `undefined`), so we must avoid it.
+		this.processNew = this.processNew.bind(this);
+		this.processRemove = this.processRemove.bind(this);
+	}
+
+	processNew(q: NewOp<F, A>): void {
 		this.createQueue.push(() => this.create(q.parentNode, q.afterNode));
-	};
-	processUpdate = (): void => {
+	}
+	processUpdate(): void {
 		// nothing to do
-	};
-	processMove = (): void => {
+	}
+	processMove(): void {
 		// nothing to do
-	};
-	processRemove = (q: RemoveOp<F, A>): number => {
+	}
+	processRemove(q: RemoveOp<F, A>): number {
 		this.deleteQueue.push(() => this.delete(q.fromNode));
 		return 0;
-	};
+	}
 
 	async apply() {
 		await Promise.all(this.deleteQueue.map(q => q()));
