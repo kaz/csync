@@ -3,6 +3,7 @@ const BoxSDK = require("box-node-sdk");
 
 import BoxFS from "./fs/box";
 import LocalFS from "./fs/local";
+import Syncer from "./sync";
 
 const main = async () => {
 	const clientID = process.env.SYNC_CLIENT_ID || "";
@@ -12,12 +13,10 @@ const main = async () => {
 	const client = sdk.getBasicClient(appToken);
 
 	const boxfs = new BoxFS(client, "0");
-	const boxtree = await boxfs.tree();
-	console.log(boxtree);
+	const localfs = new LocalFS("./box");
 
-	const localfs = new LocalFS("./src");
-	const localtree = await localfs.tree();
-	localtree;
+	const syncer = new Syncer(boxfs, localfs);
+	return syncer.sync();
 };
 
 dotenv.config();

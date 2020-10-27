@@ -1,53 +1,53 @@
 declare module "tree-diff" {
-	interface Options<T> {
-		shouldUpdate(node1: T, node2: T, node1Index: number, node2Index: number): boolean;
+	interface Option<F, A> {
+		shouldUpdate(node1: F, node2: A, node1Index: number, node2Index: number): boolean;
 		childrenKey: string;
 	}
-	interface Processors<T> {
-		processNew(q: T);
-		processUpdate(q: T);
-		processMove(q: T, r: number);
-		processRemove(q: T): number;
+	interface Processor<F, A> {
+		processNew(q: NewOp<F, A>): void;
+		processUpdate(q: UpdateOp<F, A>): void;
+		processMove(q: MoveOp<F, A>, r: number): void;
+		processRemove(q: RemoveOp<F, A>): number;
 	}
 
-	interface Patch<T> {
-		removeQueue: (RemoveOp<T> | MoveOp<T>)[];
-		insertQueue: (NewOp<T> | MoveOp<T>)[];
-		updateQueue: UpdateOp<T>[];
+	interface Patch<F, A> {
+		removeQueue: (RemoveOp<F, A> | MoveOp<F, A>)[];
+		insertQueue: (NewOp<F, A> | MoveOp<F, A>)[];
+		updateQueue: UpdateOp<F, A>[];
 	}
-	interface NewOp<T> {
+	interface NewOp<F, A> {
 		type: "new";
-		afterNode: T;
-		parentNode: T;
+		afterNode: A;
+		parentNode: F;
 		toIndex: number;
 		toPath: number[];
 	}
-	interface UpdateOp<T> {
+	interface UpdateOp<F, A> {
 		type: "update";
-		fromNode: T;
-		afterNode: T;
-		parentNode: T;
+		fromNode: F;
+		afterNode: A;
+		parentNode: F;
 		fromIndex: number;
 		fromPath: number[];
 	}
-	interface MoveOp<T> {
+	interface MoveOp<F, A> {
 		type: "move";
-		fromNode: T;
-		afterNode: T;
-		parentNode: T;
+		fromNode: F;
+		afterNode: A;
+		parentNode: F;
 		fromIndex: number;
 		toIndex: number;
 		fromPath: number[];
 		toPath: number[];
 	}
-	interface RemoveOp<T> {
+	interface RemoveOp<F, A> {
 		type: "remove";
-		fromNode: T;
-		parentNode: T;
+		fromNode: A;
+		parentNode: F;
 		fromIndex: number;
 		fromPath: number[];
 	}
 
-	function diff<T>(fromNodes: T[], afterNodes: T[], options: Options<T>): Patch<T>;
-	function patch<T>(patch: Patch<T>, processors: Processors<T>);
+	function diff<F, A>(fromNodes: F[], afterNodes: A[], options: Option<F, A>): Patch<F, A>;
+	function patch<F, A>(patch: Patch<F, A>, processors: Processor<F, A>);
 }
