@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-const BoxSDK = require("box-node-sdk");
+import BoxSDK from "box-node-sdk";
 
 import BoxFS from "./fs/box";
 import LocalFS from "./fs/local";

@@ -1,10 +1,8 @@
+import type { BoxClient } from "box-node-sdk";
+
 import { AsyncProcessor, Tree, TreeNode } from ".";
 
 type BoxTreeNode = TreeNode & { id: string; };
-
-// type-definitions for `box-node-sdk` are currently not provided.
-// see https://github.com/box/box-node-sdk/issues/170
-type BoxClinet = any;
 
 type Entry = {
 	type: "file" | "folder" | "web_link";
@@ -15,10 +13,10 @@ type Entry = {
 };
 
 export default class implements Tree<BoxTreeNode> {
-	private client: BoxClinet;
+	private client: BoxClient;
 	private rootId: string;
 
-	constructor(client: BoxClinet, rootId: string) {
+	constructor(client: BoxClient, rootId: string) {
 		this.client = client;
 		this.rootId = rootId;
 	}
@@ -72,9 +70,9 @@ export default class implements Tree<BoxTreeNode> {
 }
 
 class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
-	private client: BoxClinet;
+	private client: BoxClient;
 
-	constructor(client: BoxClinet) {
+	constructor(client: BoxClient) {
 		super();
 		this.client = client;
 	}
