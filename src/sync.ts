@@ -27,7 +27,7 @@ export default class <F extends TreeNode, A extends TreeNode> {
 		const srcTree = await this.src.tree();
 		const dstTree = await this.dst.tree();
 
-		// ignore root modificatoin
+		// ignore root modification
 		srcTree.name = dstTree.name;
 		const ops = diff([dstTree], [srcTree], opt);
 
