@@ -31,6 +31,9 @@ export default class <F extends TreeNode, A extends TreeNode> {
 		srcTree.name = dstTree.name;
 		const ops = diff([dstTree], [srcTree], opt);
 
-		patch(ops, this.dst.processor());
+		const proc = this.dst.processor();
+		patch(ops, proc);
+
+		return proc.apply();
 	}
 }
