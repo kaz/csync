@@ -78,11 +78,8 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 	}
 
 	async create(parent: BoxTreeNode, node: TreeNode): Promise<void> {
-		console.log("box.create >>", node.name);
-
 		if (node.type == "file") {
 			await this.client.files.uploadFile(parent.id, node.name, await node.content());
-			return;
 		}
 		if (node.type == "folder") {
 			const ent: Entry = await this.client.folders.create(parent.id, node.name);
@@ -92,19 +89,19 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 				name: ent.name,
 				entries: [],
 			};
-
 			await Promise.all(node.entries.map(ent => this.create(created, ent)));
-			return;
 		}
+
+		console.log("box.created >>", node.name);
 	}
 	async delete(node: BoxTreeNode): Promise<void> {
-		console.log("box.delete >>", node.name);
-
 		if (node.type == "file") {
-			return this.client.files.delete(node.id);
+			await this.client.files.delete(node.id);
 		}
 		if (node.type == "folder") {
-			return this.client.folders.delete(node.id, { recursive: true });
+			await this.client.folders.delete(node.id, { recursive: true });
 		}
+
+		console.log("box.deleted >>", node.name);
 	}
 }

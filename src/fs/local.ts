@@ -57,31 +57,30 @@ export default class implements Tree<LocalTreeNode> {
 
 class LocalProcessor extends AsyncProcessor<LocalTreeNode, TreeNode> {
 	async create(parent: LocalTreeNode, node: TreeNode): Promise<void> {
-		console.log("local.create >>", node.name);
-
 		const target = path.resolve(parent.path.toString(), node.name);
 
 		if (node.type == "file") {
 			const w = createWriteStream(target);
 			const content = await node.content();
 			content.pipe(w);
-			return new Promise(resolve => w.on("end", resolve));
+			await new Promise(resolve => w.on("end", resolve));
 		}
 		if (node.type == "folder") {
 			await fs.mkdir(target, { recursive: true });
 			const created: LocalTreeNode = Object.assign({ path: target }, node);
 			await Promise.all(node.entries.map(ent => this.create(created, ent)));
-			return;
 		}
+
+		console.log("local.created >>", node.name);
 	}
 	async delete(node: LocalTreeNode): Promise<void> {
-		console.log("local.delete >>", node.name);
-
 		if (node.type == "file") {
-			return fs.unlink(node.path);
+			await fs.unlink(node.path);
 		}
 		if (node.type == "folder") {
-			return fs.rmdir(node.path, { recursive: true });
+			await fs.rmdir(node.path, { recursive: true });
 		}
+
+		console.log("local.deleted >>", node.name);
 	}
 }
