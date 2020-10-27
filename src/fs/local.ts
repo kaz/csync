@@ -48,6 +48,7 @@ export default class implements Tree<LocalTreeNode> {
 	}
 
 	async tree(): Promise<LocalTreeNode> {
+		await fs.mkdir(this.root, { recursive: true });
 		return this.readFolder(this.root);
 	}
 	processor(): AsyncProcessor<LocalTreeNode, TreeNode> {
