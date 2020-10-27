@@ -14,11 +14,16 @@ type Entry = {
 
 export default class implements Tree<BoxTreeNode> {
 	private client: BoxClient;
-	private rootId: string;
+	private root: string;
 
-	constructor(client: BoxClient, rootId: string) {
+	constructor(client: BoxClient, root: string) {
 		this.client = client;
-		this.rootId = rootId;
+		this.root = root;
+	}
+
+	private async setupRootDir(): Promise<Entry> {
+		const accountRoot: Entry = await this.client.folders.getItems("0", { limit: 1000 });
+		return accountRoot.entries?.find(ent => ent.type == "folder" && ent.name == this.root) || this.client.folders.create("0", this.root);
 	}
 
 	private async readFile(ent: Entry): Promise<BoxTreeNode> {
@@ -62,7 +67,7 @@ export default class implements Tree<BoxTreeNode> {
 	}
 
 	async tree(): Promise<BoxTreeNode> {
-		return this.readFolder(await this.client.folders.get(this.rootId));
+		return this.readFolder(await this.setupRootDir());
 	}
 	processor(): AsyncProcessor<BoxTreeNode, TreeNode> {
 		return new BoxProcessor(this.client);
