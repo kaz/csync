@@ -1,6 +1,6 @@
 import type { BoxClient } from "box-node-sdk";
 
-import { AsyncProcessor, Tree, TreeNode } from ".";
+import { AsyncProcessor, Tree, TreeNode } from "./internal";
 
 type BoxTreeNode = TreeNode & { id: string; };
 

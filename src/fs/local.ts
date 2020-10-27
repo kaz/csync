@@ -2,7 +2,7 @@ import path from "path";
 import crypto from "crypto";
 import { promises as fs, PathLike, createReadStream, createWriteStream } from "fs";
 
-import { AsyncProcessor, Tree, TreeNode } from ".";
+import { AsyncProcessor, Tree, TreeNode } from "./internal";
 
 type LocalTreeNode = TreeNode & { path: PathLike; };
 

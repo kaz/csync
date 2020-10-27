@@ -1,5 +1,5 @@
 import { diff, patch } from "tree-diff";
-import { Tree, TreeNode } from "./fs";
+import { Tree, TreeNode } from "./fs/internal";
 
 const opt = {
 	childrenKey: "entries",
