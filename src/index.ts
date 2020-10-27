@@ -1,3 +1,4 @@
+import path from "path";
 import dotenv from "dotenv";
 import BoxSDK from "box-node-sdk";
 
@@ -6,11 +7,11 @@ import LocalFS from "./fs/local";
 import Syncer from "./sync";
 
 const main = async () => {
-	const clientID = process.env.SYNC_CLIENT_ID || "";
-	const appToken = process.env.SYNC_APP_TOKEN || "";
+	const keyPath = process.env.BOX_KEY_PATH || "";
+	const userId = process.env.BOX_USER_ID || "";
 
-	const sdk = new BoxSDK({ clientID, clientSecret: "" });
-	const client = sdk.getBasicClient(appToken);
+	const sdk = BoxSDK.getPreconfiguredInstance(require(path.resolve(process.cwd(), keyPath)));
+	const client = sdk.getAppAuthClient("user", userId);
 
 	const boxfs = new BoxFS(client, "0");
 	const localfs = new LocalFS("./box");
