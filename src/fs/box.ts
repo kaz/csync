@@ -22,6 +22,7 @@ export default class implements AsTree {
 		const ent: FolderEntry = await this.client.folders.get(this.rootId);
 		return {
 			id: ent.id,
+			type: ent.type as "folder",
 			name: ent.name,
 			entries: await this.readFolder(this.rootId),
 		};
@@ -33,6 +34,7 @@ export default class implements AsTree {
 			if (ent.type == "file") {
 				return {
 					id: ent.id,
+					type: ent.type,
 					name: ent.name,
 					sha1: ent.sha1!,
 				};
@@ -40,6 +42,7 @@ export default class implements AsTree {
 			if (ent.type == "folder") {
 				return {
 					id: ent.id,
+					type: ent.type,
 					name: ent.name,
 					entries: await this.readFolder(ent.id),
 				};

@@ -18,6 +18,7 @@ export default class implements AsTree {
 	private async readFile(cur: PathLike): Promise<TreeNode> {
 		const data = await fs.readFile(cur);
 		return {
+			type: "file",
 			name: path.basename(cur.toString()),
 			sha1: crypto.createHash("sha1").update(data).digest("hex"),
 		};
@@ -35,8 +36,9 @@ export default class implements AsTree {
 			throw new Error(`unexpected dirent: ${entPath}`);
 		}));
 		return {
+			type: "folder",
 			name: path.basename(cur.toString()),
 			entries,
 		};
-	};
+	}
 }
