@@ -71,7 +71,7 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 
 	async create(node: TreeNode, parent: BoxTreeNode): Promise<void> {
 		if (node.type == "file") {
-			await this.client.files.uploadFile(parent.id, node.name, await node.content());
+			await this.client.files.uploadFile(parent.id, node.name, node.content);
 		}
 		if (node.type == "folder") {
 			const ent = await this.client.folders.create(parent.id, node.name);

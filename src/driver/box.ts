@@ -46,8 +46,8 @@ class FilesAPI extends BaseAPI {
 	async getReadStream(id: string): Promise<Readable> {
 		return this.call(() => this.client.files.getReadStream(id));
 	}
-	async uploadFile(parentId: string, name: string, stream: Readable): Promise<File> {
-		return this.call(() => this.client.files.uploadFile(parentId, name, stream));
+	async uploadFile(parentId: string, name: string, stream: () => Promise<Readable>): Promise<File> {
+		return this.call(async () => this.client.files.uploadFile(parentId, name, await stream()));
 	}
 	async delete(id: string): Promise<void> {
 		return this.call(() => this.client.files.delete(id));
