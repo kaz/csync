@@ -1,9 +1,12 @@
-import { BoxClient } from "box-node-sdk";
 import { Readable } from "stream";
+import { BoxClient } from "box-node-sdk";
+import { Semaphore } from "semaphore-promise";
 
 import { Items, Folder } from "./box-types";
 
 class BaseAPI {
+	private semaphore = new Semaphore(16);
+
 	protected client: BoxClient;
 
 	constructor(client: BoxClient) {
@@ -11,8 +14,12 @@ class BaseAPI {
 	}
 
 	protected async call<T>(apiCall: () => Promise<T>): Promise<T> {
+		const release = await this.semaphore.acquire();
+
 		try {
-			return await apiCall();
+			const result = await apiCall();
+			release();
+			return result;
 		} catch (e) {
 			const after = (() => {
 				const maxWait = 60;
@@ -29,6 +36,7 @@ class BaseAPI {
 			})();
 
 			await new Promise(resolve => setTimeout(resolve, 1000 * after));
+			release();
 			return this.call(apiCall);
 		}
 	}
