@@ -1,13 +1,13 @@
 declare module "tree-diff" {
 	interface Option<F, A> {
-		shouldUpdate(node1: F, node2: A, node1Index: number, node2Index: number): boolean;
-		childrenKey: string;
+		shouldUpdate?(node1: F, node2: A, node1Index: number, node2Index: number): boolean;
+		childrenKey?: string;
 	}
 	interface Processor<F, A> {
 		processNew(q: NewOp<F, A>): void;
 		processUpdate(q: UpdateOp<F, A>): void;
-		processMove(q: MoveOp<F, A>, r: number): void;
-		processRemove(q: RemoveOp<F, A>): number;
+		processMove(q: MoveOp<F, A>, r: F): void;
+		processRemove(q: MoveOp<F, A> | RemoveOp<F, A>): F;
 	}
 
 	interface Patch<F, A> {
@@ -18,7 +18,7 @@ declare module "tree-diff" {
 	interface NewOp<F, A> {
 		type: "new";
 		afterNode: A;
-		parentNode: F;
+		parentNode?: F;
 		toIndex: number;
 		toPath: number[];
 	}
@@ -26,7 +26,7 @@ declare module "tree-diff" {
 		type: "update";
 		fromNode: F;
 		afterNode: A;
-		parentNode: F;
+		parentNode?: F;
 		fromIndex: number;
 		fromPath: number[];
 	}
@@ -34,7 +34,7 @@ declare module "tree-diff" {
 		type: "move";
 		fromNode: F;
 		afterNode: A;
-		parentNode: F;
+		parentNode?: F;
 		fromIndex: number;
 		toIndex: number;
 		fromPath: number[];
@@ -42,8 +42,8 @@ declare module "tree-diff" {
 	}
 	interface RemoveOp<F, A> {
 		type: "remove";
-		fromNode: A;
-		parentNode: F;
+		fromNode: F;
+		parentNode?: F;
 		fromIndex: number;
 		fromPath: number[];
 	}

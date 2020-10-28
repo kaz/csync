@@ -69,7 +69,7 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 		this.client = client;
 	}
 
-	async create(parent: BoxTreeNode, node: TreeNode): Promise<void> {
+	async create(node: TreeNode, parent: BoxTreeNode): Promise<void> {
 		if (node.type == "file") {
 			await this.client.files.uploadFile(parent.id, node.name, await node.content());
 		}
@@ -81,7 +81,7 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 				name: ent.name,
 				entries: [],
 			};
-			await Promise.all(node.entries.map(ent => this.create(created, ent)));
+			await Promise.all(node.entries.map(ent => this.create(ent, created)));
 		}
 
 		console.log("box.created >>", node.name);

@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { NewOp, Processor, RemoveOp } from "tree-diff";
+import { MoveOp, NewOp, Processor, RemoveOp } from "tree-diff";
 
 export type TreeNode = BaseNode & (FileNode | FolderNode);
 
@@ -34,7 +34,7 @@ export abstract class AsyncProcessor<F, A> implements Processor<F, A> {
 	}
 
 	processNew(q: NewOp<F, A>): void {
-		this.createQueue.push(() => this.create(q.parentNode, q.afterNode));
+		this.createQueue.push(() => this.create(q.afterNode, q.parentNode));
 	}
 	processUpdate(): void {
 		// nothing to do
@@ -42,9 +42,12 @@ export abstract class AsyncProcessor<F, A> implements Processor<F, A> {
 	processMove(): void {
 		// nothing to do
 	}
-	processRemove(q: RemoveOp<F, A>): number {
-		this.deleteQueue.push(() => this.delete(q.fromNode));
-		return 0;
+	processRemove(q: MoveOp<F, A> | RemoveOp<F, A>): F {
+		// skip move op
+		if (q.type == "remove") {
+			this.deleteQueue.push(() => this.delete(q.fromNode));
+		}
+		return q.fromNode;
 	}
 
 	async apply() {
@@ -52,6 +55,6 @@ export abstract class AsyncProcessor<F, A> implements Processor<F, A> {
 		return Promise.all(this.createQueue.map(q => q()));
 	}
 
-	abstract create(parent: F, node: A): Promise<void>;
-	abstract delete(node: A): Promise<void>;
+	abstract create(node: A, parent?: F): Promise<void>;
+	abstract delete(node: F): Promise<void>;
 }
