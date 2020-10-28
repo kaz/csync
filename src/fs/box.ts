@@ -1,16 +1,8 @@
-import type { BoxClient } from "box-node-sdk";
-
 import { AsyncProcessor, Tree, TreeNode } from "./internal";
+import { FileMini, FolderMini } from "../driver/box-types";
+import BoxClient from "../driver/box";
 
 type BoxTreeNode = TreeNode & { id: string; };
-
-type Entry = {
-	type: "file" | "folder" | "web_link";
-	id: string;
-	name: string;
-	sha1?: string;
-	entries?: Entry[],
-};
 
 export default class implements Tree<BoxTreeNode> {
 	private client: BoxClient;
@@ -21,18 +13,16 @@ export default class implements Tree<BoxTreeNode> {
 		this.root = root;
 	}
 
-	private async setupRootDir(): Promise<Entry> {
-		const accountRoot: Entry = await this.client.folders.getItems("0", { limit: 1000 });
-		return accountRoot.entries?.find(ent => ent.type == "folder" && ent.name == this.root) || this.client.folders.create("0", this.root);
+	private async setupRootDir(): Promise<FolderMini> {
+		const accountRoot = await this.client.folders.getItems("0", { limit: 1000 });
+		const found = accountRoot.entries.find(ent => ent.name == this.root);
+		if (found && found.type == "folder") {
+			return found;
+		}
+		return this.client.folders.create("0", this.root);
 	}
 
-	private async readFile(ent: Entry): Promise<BoxTreeNode> {
-		if (ent.type != "file") {
-			throw new Error(`unexpected type: "${ent.type}", expected "file"`);
-		}
-		if (!ent.sha1) {
-			throw new Error(`sha1 is null: ${JSON.stringify(ent)}`);
-		}
+	private async readFile(ent: FileMini): Promise<BoxTreeNode> {
 		return {
 			id: ent.id,
 			type: ent.type,
@@ -41,10 +31,7 @@ export default class implements Tree<BoxTreeNode> {
 			content: () => this.client.files.getReadStream(ent.id),
 		};
 	}
-	private async readFolder(ent: Entry): Promise<BoxTreeNode> {
-		if (ent.type != "folder") {
-			throw new Error(`unexpected type: "${ent.type}", expected "folder"`);
-		}
+	private async readFolder(ent: FolderMini): Promise<BoxTreeNode> {
 		return {
 			id: ent.id,
 			type: ent.type,
@@ -54,8 +41,8 @@ export default class implements Tree<BoxTreeNode> {
 	}
 
 	private async getFolderEntries(id: string): Promise<BoxTreeNode[]> {
-		const resp: Entry = await this.client.folders.getItems(id, { limit: 1000 });
-		return Promise.all(resp.entries!.map(async ent => {
+		const items = await this.client.folders.getItems(id, { limit: 1000 });
+		return Promise.all(items.entries.map(async ent => {
 			if (ent.type == "file") {
 				return this.readFile(ent);
 			}
@@ -87,10 +74,10 @@ class BoxProcessor extends AsyncProcessor<BoxTreeNode, TreeNode> {
 			await this.client.files.uploadFile(parent.id, node.name, await node.content());
 		}
 		if (node.type == "folder") {
-			const ent: Entry = await this.client.folders.create(parent.id, node.name);
+			const ent = await this.client.folders.create(parent.id, node.name);
 			const created: BoxTreeNode = {
 				id: ent.id,
-				type: "folder",
+				type: ent.type,
 				name: ent.name,
 				entries: [],
 			};
