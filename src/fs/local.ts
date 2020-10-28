@@ -1,5 +1,6 @@
 import path from "path";
 import crypto from "crypto";
+const stream = require("stream/promises");
 import { promises as fs, PathLike, createReadStream, createWriteStream } from "fs";
 
 import { AsyncProcessor, Tree, TreeNode } from "./internal";
@@ -14,10 +15,8 @@ export default class implements Tree<LocalTreeNode> {
 	}
 
 	private async readFile(cur: PathLike): Promise<LocalTreeNode> {
-		const r = createReadStream(cur);
 		const hash = crypto.createHash("sha1");
-		r.pipe(hash);
-		await new Promise(resolve => r.on("end", resolve));
+		await stream.pipeline(createReadStream(cur), hash);
 
 		return {
 			type: "file",
@@ -61,10 +60,7 @@ class LocalProcessor extends AsyncProcessor<LocalTreeNode, TreeNode> {
 		const target = path.resolve(parent.path.toString(), node.name);
 
 		if (node.type == "file") {
-			const w = createWriteStream(target);
-			const content = await node.content();
-			content.pipe(w);
-			await new Promise(resolve => w.on("end", resolve));
+			await stream.pipeline(await node.content(), createWriteStream(target));
 		}
 		if (node.type == "folder") {
 			await fs.mkdir(target, { recursive: true });
