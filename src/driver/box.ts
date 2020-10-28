@@ -14,14 +14,22 @@ class BaseAPI {
 		try {
 			return await apiCall();
 		} catch (e) {
-			if (e.statusCode == 429) {
-				const after = (e.response && e.response.headers && e.response.headers["retry-after"] || 4) + 1;
-				console.log(`[!] Rate limits exeeced. Retrying after ${after} seconds...`);
+			const after = (() => {
+				const maxWait = 60;
+				if (e.statusCode == 429) {
+					const after = Math.min(e.response && e.response.headers && e.response.headers["retry-after"] || maxWait, maxWait);
+					console.error(`[!] Rate limits exeeced.`);
+					console.error(`    Retrying after ${after} seconds...`);
+					return after;
+				} else {
+					console.error(`[!] Generic error occurred. (${e.message})`);
+					console.error(`    Retrying after ${maxWait} seconds...`);
+					return maxWait;
+				}
+			})();
 
-				await new Promise(resolve => setTimeout(resolve, 1000 * (1 + after)));
-				return this.call(apiCall);
-			}
-			throw e;
+			await new Promise(resolve => setTimeout(resolve, 1000 * after));
+			return this.call(apiCall);
 		}
 	}
 }
