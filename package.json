@@ -1,5 +1,6 @@
 {
 	"name": "csync",
+	"main": "lib/index.js",
 	"dependencies": {
 		"box-node-sdk": "^1.35.0",
 		"dotenv": "^8.2.0",
