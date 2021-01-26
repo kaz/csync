@@ -1,11 +1,11 @@
-import path from "path";
 import crypto from "crypto";
-const stream = require("stream/promises");
-import { promises as fs, PathLike, createReadStream, createWriteStream } from "fs";
-
+import { createReadStream, createWriteStream, PathLike, promises as fs } from "fs";
+import path from "path";
 import { AsyncProcessor, Tree, TreeNode } from "./internal";
 
-type LocalTreeNode = TreeNode & { path: PathLike; };
+const stream = require("stream/promises");
+
+type LocalTreeNode = TreeNode & { path: PathLike };
 
 export default class implements Tree<LocalTreeNode> {
 	private root: PathLike;
@@ -28,16 +28,18 @@ export default class implements Tree<LocalTreeNode> {
 	}
 	private async readFolder(cur: PathLike): Promise<LocalTreeNode> {
 		const dirents = await fs.readdir(cur, { withFileTypes: true });
-		const entries = await Promise.all(dirents.map(ent => {
-			const entPath = path.resolve(cur.toString(), ent.name);
-			if (ent.isFile()) {
-				return this.readFile(entPath);
-			}
-			if (ent.isDirectory()) {
-				return this.readFolder(entPath);
-			}
-			throw new Error(`unexpected dirent: ${entPath}`);
-		}));
+		const entries = await Promise.all(
+			dirents.map(ent => {
+				const entPath = path.resolve(cur.toString(), ent.name);
+				if (ent.isFile()) {
+					return this.readFile(entPath);
+				}
+				if (ent.isDirectory()) {
+					return this.readFolder(entPath);
+				}
+				throw new Error(`unexpected dirent: ${entPath}`);
+			}),
+		);
 		return {
 			type: "folder",
 			path: cur,

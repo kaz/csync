@@ -1,10 +1,9 @@
-import path from "path";
 import BoxSDK from "box-node-sdk";
-
-import BoxFS from "./box";
-import LocalFS from "./local";
-import { Tree, TreeNode } from "./internal";
+import path from "path";
 import BoxClient from "../driver/box";
+import BoxFS from "./box";
+import type { Tree, TreeNode } from "./internal";
+import LocalFS from "./local";
 
 export const getInstance = (target: string): Tree<TreeNode> => {
 	const [driver, root] = (() => {

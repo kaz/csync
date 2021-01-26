@@ -1,5 +1,5 @@
-import { Readable } from "stream";
-import { MoveOp, NewOp, Processor, RemoveOp } from "tree-diff";
+import type { Readable } from "stream";
+import type { MoveOp, NewOp, Processor, RemoveOp } from "tree-diff";
 
 export type TreeNode = BaseNode & (FileNode | FolderNode);
 

@@ -1,24 +1,20 @@
 interface Base {
-    id: string;
-    type: string;
-    name: string;
+	id: string;
+	type: string;
+	name: string;
 }
 
 export interface FileMini extends Base {
-    type: "file";
-    sha1: string;
+	type: "file";
+	sha1: string;
 }
-export interface File extends FileMini {
-
-}
+export interface File extends FileMini {}
 
 export interface FolderMini extends Base {
-    type: "folder";
+	type: "folder";
 }
-export interface Folder extends FolderMini {
-
-}
+export interface Folder extends FolderMini {}
 
 export interface Items {
-    entries: (FileMini | FolderMini)[];
+	entries: (FileMini | FolderMini)[];
 }

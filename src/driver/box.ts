@@ -1,8 +1,7 @@
-import { Readable } from "stream";
-import { BoxClient } from "box-node-sdk";
+import type { BoxClient } from "box-node-sdk";
 import { Semaphore } from "semaphore-promise";
-
-import { Items, Folder } from "./box-types";
+import type { Readable } from "stream";
+import type { Folder, Items } from "./box-types";
 
 class BaseAPI {
 	private semaphore = new Semaphore(16);
@@ -24,7 +23,10 @@ class BaseAPI {
 			const after = (() => {
 				const maxWait = 60;
 				if (e.statusCode == 429) {
-					const after = Math.min(e.response && e.response.headers && e.response.headers["retry-after"] || maxWait, maxWait);
+					const after = Math.min(
+						(e.response && e.response.headers && e.response.headers["retry-after"]) || maxWait,
+						maxWait,
+					);
 					console.error(`[!] Rate limits exeeced.`);
 					console.error(`    Retrying after ${after} seconds...`);
 					return after;

@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
-
-import Syncer from "./sync";
 import { getInstance } from "./fs";
+import Syncer from "./sync";
 
 const run = async (src: string, dst: string) => {
 	const syncer = new Syncer(getInstance(src), getInstance(dst));

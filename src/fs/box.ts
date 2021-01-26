@@ -1,8 +1,8 @@
+import type BoxClient from "../driver/box";
+import type { FileMini, FolderMini } from "../driver/box-types";
 import { AsyncProcessor, Tree, TreeNode } from "./internal";
-import { FileMini, FolderMini } from "../driver/box-types";
-import BoxClient from "../driver/box";
 
-type BoxTreeNode = TreeNode & { id: string; };
+type BoxTreeNode = TreeNode & { id: string };
 
 export default class implements Tree<BoxTreeNode> {
 	private client: BoxClient;
@@ -42,15 +42,17 @@ export default class implements Tree<BoxTreeNode> {
 
 	private async getFolderEntries(id: string): Promise<BoxTreeNode[]> {
 		const items = await this.client.folders.getItems(id, { limit: 1000 });
-		return Promise.all(items.entries.map(async ent => {
-			if (ent.type == "file") {
-				return this.readFile(ent);
-			}
-			if (ent.type == "folder") {
-				return this.readFolder(ent);
-			}
-			throw new Error(`unexpected entry: ${JSON.stringify(ent)}`);
-		}));
+		return Promise.all(
+			items.entries.map(async ent => {
+				if (ent.type == "file") {
+					return this.readFile(ent);
+				}
+				if (ent.type == "folder") {
+					return this.readFolder(ent);
+				}
+				throw new Error(`unexpected entry: ${JSON.stringify(ent)}`);
+			}),
+		);
 	}
 
 	async tree(): Promise<BoxTreeNode> {
