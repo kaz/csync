@@ -10,6 +10,9 @@ export const getInstance = (target: string): Tree<TreeNode> => {
 		const [e1, e2] = target.split(":");
 		return e2 ? [e1, e2] : ["local", e1];
 	})();
+	if (!root) {
+		throw new Error(`invalid target`);
+	}
 
 	if (driver == "local") {
 		return new LocalFS(root);

@@ -9,6 +9,14 @@ const run = async (src: string, dst: string) => {
 
 const main = async () => {
 	const [, , src, dst] = process.argv;
+
+	if (!src) {
+		throw new Error(`src is not defined`);
+	}
+	if (!dst) {
+		throw new Error(`dst is not defined`);
+	}
+
 	return run(src, dst);
 };
 
